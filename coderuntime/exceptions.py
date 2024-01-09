@@ -1,0 +1,3 @@
+
+class UnsupportedRuntime(Exception):
+    pass

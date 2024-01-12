@@ -1,5 +1,5 @@
-from exceptions import TodoNotFound
-from models import TodoStatus
+from todo.exceptions import TodoNotFound
+from todo.models import TodoStatus
 
 class TodoCollection:
     todos = []
@@ -18,7 +18,7 @@ class TodoCollection:
     @staticmethod
     def add_todo(todo):
         todo.id = TodoCollection.get_next_id()
-        TodoCollection.append(todo)
+        TodoCollection.todos.append(todo)
         return todo.id
 
     @staticmethod
@@ -31,7 +31,7 @@ class TodoCollection:
 
     @staticmethod
     def delete_todo(todo):
-        for t in enumerate(TodoCollection.todos):
+        for t in TodoCollection.todos:
             if t == todo:
                 t.status = TodoStatus.DELETED
                 return 

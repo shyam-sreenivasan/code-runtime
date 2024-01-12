@@ -1,2 +1,2 @@
 class TodoNotFound(Exception):
-    pass
+    msg = "No such todo item found"

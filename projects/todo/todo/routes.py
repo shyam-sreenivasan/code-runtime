@@ -4,13 +4,13 @@ from todo import controller as ctrl
 from todo.utils import get_error_response, get_sucesss_response
 from todo.exceptions import TodoNotFound
 
-@app.route('/todo', methods=['POST'])
+@app.route('/todos', methods=['POST'])
 def createtodo():
     try:
         data = request.get_json()
         name = data.get("name")
         desc = data.get("desc")
-        deadline = data.get(deadline)
+        deadline = data.get("deadline")
         todo_id = ctrl.create(name, desc, deadline)
         return get_sucesss_response(data={"id": todo_id})
     except Exception as e:
@@ -20,15 +20,15 @@ def createtodo():
 
 @app.route('/todos', methods=['GET'])
 @app.route('/todos/<todo_id>', methods=['GET'])
-def get_todo(todo_id=None):
+def get_todos(todo_id=None):
     msg = "Error"
     try:
         if todo_id is None:
             todos = ctrl.get_all()
-            return get_sucesss_response(data=todos)
+            return get_sucesss_response(data=[todo.as_dict() for todo in todos])
         
         todo = ctrl.get(int(todo_id))
-        return get_sucesss_response(data=todo)
+        return get_sucesss_response(data=todo.as_dict())
     except TodoNotFound:
         msg = TodoNotFound.msg
     except Exception as e:
@@ -36,12 +36,12 @@ def get_todo(todo_id=None):
 
     return get_error_response(msg=msg)
 
-@app.route('/todo/<todo_id>', methods=['PUT'])
+@app.route('/todos/<todo_id>', methods=['PUT'])
 def update_todo(todo_id):
     msg = "Error"
     try:
         data = request.get_json()
-        ctrl.update(todo_id, data)
+        ctrl.update(int(todo_id), data)
         return get_sucesss_response(data=None)
     except TodoNotFound:
         msg = TodoNotFound.msg
@@ -50,7 +50,7 @@ def update_todo(todo_id):
 
     return get_error_response(msg=msg)
 
-@app.route('/todo/todo_id', methods=['DELETE'])
+@app.route('/todos/<todo_id>', methods=['DELETE'])
 def delete_todo(todo_id):
     msg = "Error"
     try:
@@ -64,7 +64,7 @@ def delete_todo(todo_id):
     return get_error_response(msg=msg)
 
 @app.route('/todos', methods=['DELETE'])
-def delete_todo(todo_id):
+def clear_todos():
     msg = "Error"
     try:
         ctrl.clear()

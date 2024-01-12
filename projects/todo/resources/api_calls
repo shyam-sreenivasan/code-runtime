@@ -1,0 +1,35 @@
+curl -X GET http://localhost:5001/todos
+
+curl -X GET http://localhost:5001/todos/0
+
+curl -X POST -H "Content-Type: application/json" -d '{"name": "Task 1", "desc": "Description for Task 1", "deadline": "2024-01-31"}' http://localhost:5001/todo
+
+
+curl -X PUT -H "Content-Type: application/json" -d '{"name": "Updated Task", "desc": "Updated description", "deadline": "2024-02-15"}' http://localhost:5001/todos/0
+
+curl -X DELETE http://localhost:5001/todos/0
+
+curl -X DELETE http://localhost:5001/todos
+
+
+======== For windows ==========
+# Create a Todo
+Invoke-RestMethod -Uri "http://localhost:5001/todos" -Method Post -Headers @{"Content-Type"="application/json"} -Body '{"name": "Task 1", "desc": "Description for Task 1", "deadline": "2024-01-31"}'
+
+# Get all Todos
+Invoke-RestMethod -Uri "http://localhost:5001/todos" -Method Get
+
+# Get a specific Todo by ID
+Invoke-RestMethod -Uri "http://localhost:5001/todos/<todo_id>" -Method Get
+# Replace <todo_id> with the actual ID of the Todo
+
+# Update a Todo
+Invoke-RestMethod -Uri "http://localhost:5001/todos/0" -Method Put -Headers @{"Content-Type"="application/json"} -Body '{"name": "Updated Task", "desc": "Updated description", "deadline": "2024-02-15"}'
+# Replace <todo_id> with the actual ID of the Todo
+
+# Delete a Todo
+Invoke-RestMethod -Uri "http://localhost:5001/todos/0" -Method Delete
+# Replace <todo_id> with the actual ID of the Todo
+
+# Delete all Todos
+Invoke-RestMethod -Uri "http://localhost:5001/todos" -Method Delete

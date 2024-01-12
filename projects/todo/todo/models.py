@@ -11,3 +11,11 @@ class Todo:
         self.deadline = deadline
         self.status = status
 
+    def as_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "desc": self.desc,
+            "deadline": self.deadline,
+            "status": self.status
+        }

@@ -1,4 +1,3 @@
-from todo.collection import todos, columns
 from todo.models import Todo
 from todo.collection import TodoCollection
 

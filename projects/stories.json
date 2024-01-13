@@ -10,6 +10,20 @@
                     "description": "You have to create the endpoints for creating and fetching todo items",
                     "input_proj_version": "1.0",
                     "output_proj_version": "1.1"
+                },
+                {
+                    "id": 2,
+                    "name": "Mission Two",
+                    "description": "Validate the input request for the create endpoint",
+                    "input_proj_version": "1.1",
+                    "output_proj_version": "1.2"
+                },
+                {
+                    "id": 3,
+                    "name": "Mission Three",
+                    "description": "Add user authentication for user authenticity and privacy of data",
+                    "input_proj_version": "1.3",
+                    "output_proj_version": "1.4"
                 }
             ]
         }
@@ -20,7 +34,16 @@
             "id": 1,
             "role_id": 1,
             "story_id": 1,
-            "missions": [0, 2, 4, 5]
+            "missions": [1, 2]
+            
+        },
+
+        {
+            "id": 2,
+            "role_id": 2,
+            "story_id": 1,
+            "missions": [2, 3]
+            
         }
     ]   
 }

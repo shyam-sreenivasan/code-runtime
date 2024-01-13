@@ -1,0 +1,26 @@
+{
+    "stories": [
+        {
+            "id": 1,
+            "project-id": 1,
+            "missions": [
+                {
+                    "id": 1,
+                    "name": "Mission One",
+                    "description": "You have to create the endpoints for creating and fetching todo items",
+                    "input_proj_version": "1.0",
+                    "output_proj_version": "1.1"
+                }
+            ]
+        }
+    ],
+
+    "role_stories": [
+        {
+            "id": 1,
+            "role_id": 1,
+            "story_id": 1,
+            "missions": [0, 2, 4, 5]
+        }
+    ]   
+}

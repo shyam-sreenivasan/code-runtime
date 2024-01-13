@@ -1,0 +1,10 @@
+{
+    "roles": [
+        {
+            "id": 1,
+            "code": "JFSD",
+            "name": "Junior FullStack Developer",
+            "responsibilities": "He must be able to do this do that"
+        }
+    ]
+}

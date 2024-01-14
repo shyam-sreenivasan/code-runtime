@@ -1,5 +1,7 @@
 supported_runtimes = ["python3.10"]
 default_execution_err_msg = "An error occurred"
+project_root = "./projects"
+
 class ExecutionCodes:
     SUCCESS = 100
     ERROR = 101
@@ -19,3 +21,5 @@ error_response = {
         "msg": None
     }
 }
+
+ignore_files_like = ["__pycache__"]

@@ -1,21 +1,25 @@
-from coderuntime.constants import success_response, error_response, ignore_files_like, ExecutionCodes, project_root
-from coderuntime.utils import timedfunction, get_project_tree
+from coderuntime.constants import ignore_files_like, ExecutionCodes, project_root
+from coderuntime.utils import timedfunction, get_project_tree, find_process_by_port
 from flask import request, jsonify
 from coderuntime.execution import execute
 from coderuntime.exceptions import UnsupportedRuntime
 from coderuntime import app
 import os
+import subprocess
+import traceback
+
 projects = None
 project_tree = {}
 project_path_map = {}
+running_processes = {}
+PROJECT_NOT_FOUND = "Project Not Found"
 
+project_ports = {
+    "todo": 5001
+}
 @app.route('/', methods=["GET"])
 def home():
-    return "Works"
-
-@app.after_request
-def after_request(response):
-    return jsonify(response)
+    return {"status": 100, "data": {}}
 
 @app.route('/projects', methods=['GET'])
 @app.route('/projects/<name>', methods=['GET'])
@@ -24,30 +28,29 @@ def get_projects(name=None):
     try:
         if name is None:
             if projects is None:
+                projects = []
                 for item in os.listdir(project_root):
                     if os.path.isdir(os.path.join(project_root, item)):
                         projects.append(item)
-            success_response["data"]["projects"] = projects
-            return success_response
+            return {"status": 100, "data": {"projects": projects}}
         
         if name.strip() == 0:
-            error_response["data"]["msg"] = "Name cannot be empty"
-            return error_response
-        
-        if name not in projects:
-            error_response["data"]["msg"] = "Project not found"
+            return {"status": 101, "data": {"msg": "Name cannot be empty"}}
 
+        if name not in projects:
+            return {"status": 101, "data": {"msg": PROJECT_NOT_FOUND}}
+        
         tree, path_map = get_project_tree(name, project_root, ignore_files=ignore_files_like)
-        project_tree["name"] = tree
-        project_path_map["name"] = path_map
-        success_response["data"]["project"] = tree
-        return success_response
+        project_tree[name] = tree
+        project_path_map[name] = path_map
+        print(tree)
+        return {"status": 100, "data": {"project": tree}}
         
     except Exception as e:
         print(e)
-    error_response["data"]["msg"] = "Unknown error"
-
-    return error_response
+        import traceback
+        traceback.print_exc()
+    return {"status": 101, "data": {"msg": "Unknown error"}}
 
 @app.route('/execute', methods=["POST"])
 def codeexec():
@@ -59,67 +62,100 @@ def codeexec():
         output, code = result
 
         if code == ExecutionCodes.ERROR:
-            error_response["data"]["msg"] = output
-            return jsonify(error_response)
-        
-        success_response["data"]["output"] = output
-        success_response["data"]["completed_in_secs"] = f"{int(time_taken)}"
-        return success_response
+            return {"status": 101, "data": {"msg": output}}
+
+        return {"status": 100, "data": {"output": output, "completed_in_secs": f"{int(time_taken)}"}}
     except UnsupportedRuntime:
-        error_response["data"]["msg"] = "Unsupported Runtime"
-        return error_response
+        return {"status": 101, "data": {"msg": "Unsupported Runtime"}}
     except Exception as e:
         print(e)
 
-    error_response["data"]["msg"] = "Unknown Error. Please try again later"
-    return error_response
+    return {"status": 101, "data": {"msg": "Unknown Error. Please try again later"}}
 
-@app.route('/project/<project_name>/file/<file_id>', methods=['GET'])
+@app.route('/projects/<project_name>/file/<file_id>', methods=['GET'])
 def getfile(project_name, file_id):
     try:
         if project_name not in projects:
-            error_response["data"]["msg"] = "No such project found"
-            return error_response
-
+            return {"status": 101, "data": {"msg": PROJECT_NOT_FOUND}}
+        print(project_path_map)
         path_map = project_path_map[project_name]
         for item in path_map:
             if int(item['id']) == int(file_id):
-                with open(item['fullpath'], 'r') as f:
-                    contents = f.readlines()
-                    print(contents)
-                    success_response["data"] = {
+                with open(item['path'], 'r') as f:
+                    contents = f.read()
+        
+                return {"status": 100, "data": {
                         "project_name": project_name,
                         "file_id": file_id,
                         "contents": contents 
-                    }
-        
-                return success_response
+                    }}
     except Exception as e:
         print(e)
+        import traceback
+        traceback.print_exc()
 
-    error_response["data"]["msg"] = "Unable to get file contents"
-    return error_response
+    return {"status": 101, "data": {"msg": "Unable to get file contents"}}
 
-@app.route('/project/<project_name>/file', methods=["PUT"])
+@app.route('/projects/<project_name>/file', methods=["PUT"])
 def updatefile(project_name):
     try:
         data = request.get_json()
         file_id = data.get('file_id')
         contents = data.get('contents')
         if project_name not in projects:
-            error_response["data"]["msg"] = "No such project found"
-            return error_response
+            return {"status": 101, "data": {"msg": PROJECT_NOT_FOUND}}
         path_map = project_path_map[project_name]
         for item in path_map:
             if int(item['id']) == int(file_id):
-                with open(item['fullpath'], 'w') as f:
-                    f.writelines(contents)
-                success_response["data"]["msg"] = "File Updated Successfully"
-                return success_response
+                with open(item['path'], 'w') as f:
+                    f.write(contents)
+                return {"status": 100, "data": {"msg": "File Updated Successfully"}}
     except Exception as e:
         print(e)
-    return error_response
+        import traceback
+        traceback.print_exc()
+    return {"status": 101, "data": {"msg": "Unknow Error"}}
 
-@app.route('/project/deploy', methods=['POST'])
-def deploy_project():
-    return
+@app.route('/projects/<project_name>/deploy', methods=['POST'])
+def deploy_app(project_name):
+    try:
+        if project_name not in projects:
+            return {"status": 101, "data": {"msg": PROJECT_NOT_FOUND}}
+
+        existing_process = find_process_by_port(project_ports[project_name])
+        if existing_process:
+            existing_process.terminate()
+            existing_process.wait()
+            print("Existing process terminated")
+        
+        process = subprocess.Popen(['python', 'projects/todo/main.py'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+        if find_process_by_port(project_ports[project_name]):
+            running_processes[project_name] = {'process': process, 'pid': process.pid}
+            return {"status": 100, "data": {"msg": "Service deployed", "url": f"http://localhost:{project_ports[project_name]}/"}}
+
+    
+    except Exception as e:
+        print(e)
+        import traceback
+        traceback.print_exc()
+    return {"status": 101, "data": {"msg": "Unable to deploy service"}}
+
+@app.route("/projects/<project_name>/stop", methods=['POST'])
+def stop_app(project_name):
+    try:
+        if project_name not in projects:
+            return {"status": 101, "data": {"msg": PROJECT_NOT_FOUND}}
+
+        existing_process = find_process_by_port(project_ports[project_name])
+        if not existing_process:
+            return {"status": 101, "data": {"msg": "App is not running"}}
+        existing_process.terminate()
+        existing_process.wait()
+        running_processes.pop(project_name)
+        print("Existing process terminated")
+        return {"status": 100, "data": {"msg": "App terminated"}}
+    except Exception as e:
+        print(e)
+        traceback.print_exc()
+    return {"status": 101, "data": {"msg": "Unable to stop app"}}

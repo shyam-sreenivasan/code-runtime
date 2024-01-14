@@ -1,6 +1,7 @@
 
 import time
 import os
+import psutil
 
 def timedfunction(func, *args, **kwargs):
     start_time = int(time.time())
@@ -52,3 +53,13 @@ def get_project_tree(name, parent, ignore_files=None):
         final_item["items"] = items
         return final_item
     return get_sub_tree(name, parent), path_map
+
+def find_process_by_port(port):
+    for proc in psutil.process_iter(['pid', 'name', 'connections']):
+        try:
+            for conn in proc.info['connections']:
+                if conn.status == psutil.CONN_LISTEN and conn.laddr.port == port:
+                    return psutil.Process(proc.pid)
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
+            pass
+    return None

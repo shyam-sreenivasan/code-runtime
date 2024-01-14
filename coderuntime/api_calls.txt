@@ -1,0 +1,41 @@
+# 1. Home endpoint
+curl http://localhost:5000/
+
+# 2. Projects endpoint
+curl http://localhost:5000/projects
+
+# 3. Projects with Name endpoint
+curl http://localhost:5000/projects/project_name
+
+# 4. Execute endpoint
+curl -X POST -H "Content-Type: application/json" -d '{"code":"your_code", "runtime":"your_runtime"}' http://localhost:5000/execute
+
+# 5. Get File endpoint
+curl http://localhost:5000/projects/project_name/file/file_id
+
+# 6. Update File endpoint
+curl -X PUT -H "Content-Type: application/json" -d '{"file_id": "your_file_id", "contents": "your_contents"}' http://localhost:5000/projects/project_name/file
+
+# 7. Deploy Project endpoint
+curl -X POST http://localhost:5000/projects/deploy
+
+
+For windows powershell.
+----------------------
+# 1. Home endpoint
+Invoke-RestMethod -Uri "http://localhost:5000/"
+
+# 2. Projects endpoint
+Invoke-RestMethod -Uri "http://localhost:5000/projects"
+
+# 3. Projects with Name endpoint
+Invoke-RestMethod -Uri "http://localhost:5000/projects/project_name"
+
+# 4. Execute endpoint
+Invoke-RestMethod -Uri "http://localhost:5000/execute" -Method Post -Headers @{"Content-Type"="application/json"} -Body '{"code":"your_code", "runtime":"your_runtime"}'
+
+# 5. Get File endpoint
+Invoke-RestMethod -Uri "http://localhost:5000/projects/todo/file/9"
+
+# 6. Update File endpoint
+refer api_test.py

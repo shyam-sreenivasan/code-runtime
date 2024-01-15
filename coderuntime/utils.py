@@ -17,6 +17,13 @@ def get_next_id(i=0):
         i += 1
         yield i 
 
+def get_projects(project_root):
+    projects = []
+    for item in os.listdir(project_root):
+        if os.path.isdir(os.path.join(project_root, item)):
+            projects.append(item)
+    return projects
+
 def get_project_tree(name, parent, ignore_files=None):
     if ignore_files is None:
         ignore_files = []

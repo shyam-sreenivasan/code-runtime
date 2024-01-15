@@ -23,3 +23,7 @@ error_response = {
 }
 
 ignore_files_like = ["__pycache__"]
+project_ports = {
+    "todo": 5001
+}
+PROJECT_NOT_FOUND = "Project Not Found"

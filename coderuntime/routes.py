@@ -1,22 +1,17 @@
-from coderuntime.constants import ignore_files_like, ExecutionCodes, project_root
-from coderuntime.utils import timedfunction, get_project_tree, find_process_by_port
-from flask import request, jsonify
+from coderuntime.constants import ignore_files_like, ExecutionCodes, project_root, project_ports, PROJECT_NOT_FOUND
+from coderuntime.utils import timedfunction, get_project_tree, find_process_by_port, get_projects
+from flask import request
 from coderuntime.execution import execute
 from coderuntime.exceptions import UnsupportedRuntime
-from coderuntime import app
-import os
+from coderuntime import app, projects
 import subprocess
 import traceback
 
-projects = None
 project_tree = {}
 project_path_map = {}
 running_processes = {}
-PROJECT_NOT_FOUND = "Project Not Found"
 
-project_ports = {
-    "todo": 5001
-}
+
 @app.route('/', methods=["GET"])
 def home():
     return {"status": 100, "data": {}}
@@ -27,11 +22,6 @@ def get_projects(name=None):
     global projects
     try:
         if name is None:
-            if projects is None:
-                projects = []
-                for item in os.listdir(project_root):
-                    if os.path.isdir(os.path.join(project_root, item)):
-                        projects.append(item)
             return {"status": 100, "data": {"projects": projects}}
         
         if name.strip() == 0:
@@ -43,7 +33,6 @@ def get_projects(name=None):
         tree, path_map = get_project_tree(name, project_root, ignore_files=ignore_files_like)
         project_tree[name] = tree
         project_path_map[name] = path_map
-        print(tree)
         return {"status": 100, "data": {"project": tree}}
         
     except Exception as e:

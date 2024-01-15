@@ -4,6 +4,7 @@ class TodoStatus:
     COMPLETED = 1
     INCOMPLETE = 2
     DELETED = 3
+    EXPIRED = 4
 
 class Todo:
     def __init__(self, name, desc, deadline, status=TodoStatus.PENDING):
